@@ -27,14 +27,13 @@ pipeline {
     stage('Build') {
       steps {
         sh 'sbt clean compile package'
-        archiveArtifacts 'target/*/*.jar'
-        archiveArtifacts 'target/scala-2.11/classes/*'
-        archiveArtifacts 'target/webapp/*'
       }
     }
     stage('Deploy') {
       steps {
-        sh 'sudo cp target/*/*.jar /opt/deploy/'
+        sh 'sudo cp target/scala-2.11/classes /opt/deploy/realTimeMovieRec/'
+        sh 'sudo cp target/scala-2.11/*.jar /opt/deploy/realTimeMovieRec/'
+        sh 'sudo cp target/webapp /opt/deploy/realTimeMovieRec/'
       }
     }
   }
