@@ -31,9 +31,8 @@ pipeline {
     }
     stage('Deploy') {
       steps {
-        sh 'sudo cp target/scala-2.11/classes /opt/deploy/realTimeMovieRec/'
-        sh 'sudo cp target/scala-2.11/*.jar /opt/deploy/realTimeMovieRec/'
-        sh 'sudo cp target/webapp /opt/deploy/realTimeMovieRec/'
+        sh 'sudo cp target/*/*.war /opt/deploy/realTimeMovieRec/'
+        sh 'sudo cp target/*/*.jar /opt/deploy/realTimeMovieRec/'
       }
     }
   }
