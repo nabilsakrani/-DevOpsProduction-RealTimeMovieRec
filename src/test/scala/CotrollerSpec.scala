@@ -12,7 +12,7 @@ class CotrollerSpec extends ScalatraFlatSpec with BeforeAndAfterAll {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    config = ConfigFactory.parseFile(new File("/opt/conf/RealTimeML_staging.conf"))
+    config = ConfigFactory.parseFile(new File("conf/RealTimeML_test.conf"))
   }
 
   addServlet(classOf[TestController], "/test/*")
