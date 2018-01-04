@@ -38,6 +38,10 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
   def initSpark(confFile : String) : Unit = {
 
     val cf = new File(confFile)
+
+    if(!cf.exists())
+      throw new IllegalArgumentException("The Configuration File doesn't exists!!")
+
     val config = ConfigFactory.parseFile(cf)
 
     logger.info("------> Retrieve Conf variables <------")
@@ -46,6 +50,9 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
     MODEL_NAME = config.getString("rtml.model.name")
     SPARK_APPNAME = config.getString("rtml.spark.app_name")
     SPARK_MASTER = config.getString("rtml.spark.master")
+
+    if(!new File(MODEL_ARCHIVE_PATH).exists())
+      throw new IllegalArgumentException("The Zipped model doesn't exists")
 
     logger.info("------> ENV")
     logger.info("------>")

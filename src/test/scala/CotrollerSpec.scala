@@ -1,14 +1,27 @@
-import it.reply.data.pasquali.controller.{TestController}
-import org.scalatra.test.scalatest.{ScalatraFlatSpec}
+import java.io.File
 
-import scala.reflect.io.File
+import it.reply.data.pasquali.controller.TestController
+import org.scalatest.BeforeAndAfterAll
+import org.scalatra.test.scalatest.ScalatraFlatSpec
+import com.typesafe.config._
 
-class CotrollerSpec extends ScalatraFlatSpec {
+class CotrollerSpec extends ScalatraFlatSpec with BeforeAndAfterAll {
+
+
+  var config : Config = null
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+
+    config = ConfigFactory.parseFile(new File("/opt/conf/RealTimeML_test.conf"))
+  }
 
   addServlet(classOf[TestController], "/test/*")
 
   "At sturtup, a valid archive" must "be in model folder" in {
-    assert(File("model/m20Model.zip").exists)
+    //assert(new File("model/m20Model.zip").exists)
+
+    assert(new File(config.getString("rtml.model.archive_path")).exists)
   }
 
   "Test root api" should "be online and show hello" in {
