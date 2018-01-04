@@ -6,7 +6,7 @@ import org.scalatra.scalate.ScalateSupport
 class TestController extends ScalatraServlet with FlashMapSupport with ScalateSupport {
 
   //val CONF_FILE_TEST = "/opt/conf/RealTimeML_staging.conf"
-  val CONF_FILE_TEST = "conf/RealTimeML_test.conf"
+  val CONF_FILE_TEST = "/opt/conf/RealTimeML_test.conf"
   var controller : Controller = null
 
   def initController() = {
