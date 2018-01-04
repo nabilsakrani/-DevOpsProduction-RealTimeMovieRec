@@ -28,9 +28,16 @@ libraryDependencies ++= Seq(
   "org.apache.spark"        %  "spark-hive_2.11"              % "2.2.0",
   "org.apache.spark"        %  "spark-yarn_2.11"              % "2.2.0",
   "org.apache.kudu"         %  "kudu-spark2_2.11"             % "1.5.0",
-  "org.apache.spark"        %  "spark-mllib_2.11"             % "2.2.0"
+  "org.apache.spark"        %  "spark-mllib_2.11"             % "2.2.0",
+  "com.typesafe"            %  "config"                       % "1.3.2"
 )
 
 enablePlugins(JettyPlugin)
 //enablePlugins(SbtTwirl)
-        
+
+//containerPort in Jetty := 10000
+
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case x => MergeStrategy.first
+}
