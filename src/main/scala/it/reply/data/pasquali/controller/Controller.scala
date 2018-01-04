@@ -54,6 +54,12 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
     if(!new File(MODEL_ARCHIVE_PATH).exists())
       throw new IllegalArgumentException("The Zipped model doesn't exists")
 
+    logger.info("------> Initialize Spark")
+
+    collabModel = MovieRecommenderEngine()
+      .init(SPARK_APPNAME, SPARK_MASTER)
+
+
     logger.info("------> ENV")
     logger.info("------>")
     logger.info(s"------> MODEL_ZIP_PATH = ${MODEL_ARCHIVE_PATH}")
@@ -62,10 +68,6 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
     logger.info(s"------> SPARK_APP_NAME = ${SPARK_APPNAME}")
     logger.info(s"------> SPARK_MASTER = ${SPARK_MASTER}")
 
-    logger.info("------> Initialize Spark")
-
-    collabModel = MovieRecommenderEngine()
-      .init(SPARK_APPNAME, SPARK_MASTER)
 
     logger.info("------> Spark Initialized")
     logger.info("------> Unzip ML Model")
