@@ -14,7 +14,8 @@ import scala.xml.Node
 
 class Controller extends ScalatraServlet with FlashMapSupport with ScalateSupport{
 
-  val CONF_FILE_DEFAULT = "/opt/conf/RealTimeML.conf"
+  var CONF_DIR = scala.util.Properties.envOrElse("DEVOPS_CONF_DIR", "conf")
+  var CONFIG_FILE = "RealTimeML.conf"
 
   private def displayPage(title:String, content:Seq[Node]) =
     Template.page(title, content, url(_))
@@ -94,7 +95,9 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
   get("/") {
 
     if(collabModel == null)
-      initSpark(CONF_FILE_DEFAULT)
+    {
+      initSpark(s"${CONF_DIR}/${CONFIG_FILE}")
+    }
 
     val users = ""
     val movies = ""
@@ -136,7 +139,7 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
   get("/see/:user/:movie") {
 
     if(collabModel == null)
-      initSpark(CONF_FILE_DEFAULT)
+      initSpark(s"${CONF_DIR}/${CONFIG_FILE}")
 
     val user = params.getOrElse("user", "-1").toInt
     val movie = params.getOrElse("movie", "-1").toInt
@@ -154,7 +157,7 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
   get("/see/:user/:movie/:rate") {
 
     if(collabModel == null)
-      initSpark(CONF_FILE_DEFAULT)
+      initSpark(s"${CONF_DIR}/${CONFIG_FILE}")
 
     val user = params.getOrElse("user", "-1").toInt
     val movie = params.getOrElse("movie", "-1").toInt
