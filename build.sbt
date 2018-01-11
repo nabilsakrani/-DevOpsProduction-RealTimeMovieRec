@@ -2,7 +2,7 @@ name := "RealTimeMovieRec"
 
 version := "0.1"
 
-scalaVersion := "2.11.11"
+scalaVersion := "2.11.8"
 
 val ScalatraVersion = "2.6.+"
 val sparkVersion = "2.2.0"
@@ -15,8 +15,8 @@ libraryDependencies ++= Seq(
   "org.scalatra"            %% "scalatra"                     % ScalatraVersion,
   "org.scalatra"            %% "scalatra-scalate"             % ScalatraVersion,
   "org.scalatra"            %% "scalatra-specs2"              % ScalatraVersion     % "test",
-  "org.eclipse.jetty"       %  "jetty-webapp"                 % "9.4.6.v20170531"   % "provided",
-  "javax.servlet"           %  "javax.servlet-api"            % "3.1.0"             % "provided",
+  "org.eclipse.jetty"       % "jetty-webapp"                  % "9.2.15.v20160210"  % "container;compile",
+  "javax.servlet"           %  "javax.servlet-api"            % "3.1.0"             % "container;compile",
 
   "org.scalatra"            %% "scalatra-scalatest"           % "2.6.2"             % "test",
 
