@@ -5,10 +5,12 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatra.test.scalatest.ScalatraFlatSpec
 import com.typesafe.config._
 
+import scala.util.Properties
+
 class CotrollerSpec extends ScalatraFlatSpec with BeforeAndAfterAll {
 
-
-  var CONF_FILE = "/opt/conf/RealTimeML_staging.conf"
+  var CONF_DIR = Properties.envOrElse("DEVOPS_CONF_DIR", "conf")
+  var CONF_FILE = s"$CONF_DIR/RealTimeML_staging.conf"
 
   var config : Config = null
 
@@ -73,7 +75,7 @@ class CotrollerSpec extends ScalatraFlatSpec with BeforeAndAfterAll {
       var pred : Double = body.toDouble
 
       assert(pred >= 0.0)
-      assert(pred <= 0.1)
+      assert(pred <= 1.0)
     }
   }
 

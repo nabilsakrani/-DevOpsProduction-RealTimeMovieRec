@@ -154,6 +154,19 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
     )
   }
 
+  get("/raw/see/:user/:movie") {
+
+    if(collabModel == null)
+      initSpark(s"${CONF_DIR}/${CONFIG_FILE}")
+
+    val user = params.getOrElse("user", "-1").toInt
+    val movie = params.getOrElse("movie", "-1").toInt
+
+    val rate = collabModel.predictRating(user, movie)
+
+    rate
+  }
+
   get("/see/:user/:movie/:rate") {
 
     if(collabModel == null)
@@ -171,5 +184,24 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
         The recommender supposed a rate of { predict }
       </span>
     )
+  }
+
+  get("/raw/see/:user/:movie/:rate") {
+
+    if(collabModel == null)
+      initSpark(s"${CONF_DIR}/${CONFIG_FILE}")
+
+    val user = params.getOrElse("user", "-1").toInt
+    val movie = params.getOrElse("movie", "-1").toInt
+    val rate = params.getOrElse("rate", "0.0")
+
+    val predict = collabModel.predictRating(user, movie)
+
+    s"$predict - $rate"
+  }
+
+
+  get("/isOnline") {
+    "is Online"
   }
 }

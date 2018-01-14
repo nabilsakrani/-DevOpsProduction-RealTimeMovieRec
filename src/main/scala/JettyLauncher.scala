@@ -18,5 +18,7 @@ object JettyLauncher { // this is my entry object as specified in sbt project de
 
     server.start
     server.join
+
+    println("IS ONLINE")
   }
 }
