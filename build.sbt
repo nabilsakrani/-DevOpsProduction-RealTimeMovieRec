@@ -32,7 +32,8 @@ libraryDependencies ++= Seq(
   "org.apache.spark"        %  "spark-yarn_2.11"              % "2.2.0",
   "org.apache.kudu"         %  "kudu-spark2_2.11"             % "1.5.0",
   "org.apache.spark"        %  "spark-mllib_2.11"             % "2.2.0",
-  "com.typesafe"            %  "config"                       % "1.3.2"
+  "com.typesafe"            %  "config"                       % "1.3.2",
+  //"org.scalaj"              % "scalaj-http_2.11"              % "2.3.0"
 )
 
 enablePlugins(JettyPlugin)
