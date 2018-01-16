@@ -93,6 +93,8 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
 
     userNodes = userIDs.map(id => <li>{id}</li>)
     movieNodes = movieIDs.map(id => <li>{id}</li>)
+
+    logger.info("------> IS ONLINE")
   }
 
   get("/") {
