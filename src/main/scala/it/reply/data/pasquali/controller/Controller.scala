@@ -16,7 +16,7 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
 
   //var CONF_DIR = scala.util.Properties.envOrElse("DEVOPS_CONF_DIR", "conf")
   var CONF_DIR = "conf"
-  var CONFIG_FILE = "RealTimeML.conf"
+  var CONFIG_FILE = "application.conf"
 
   private def displayPage(title:String, content:Seq[Node]) =
     Template.page(title, content, url(_))
@@ -37,7 +37,7 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
 
   val logger = LoggerFactory.getLogger(getClass)
 
-  def initSpark(confFile : String) : Unit = {
+  def initSpark() : Unit = {
 
 //    val cf = new File(confFile)
 //
@@ -99,7 +99,7 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
 
     if(collabModel == null)
     {
-      initSpark(s"${CONF_DIR}/${CONFIG_FILE}")
+      initSpark()
     }
 
     val users = ""
@@ -142,7 +142,7 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
   get("/see/:user/:movie") {
 
     if(collabModel == null)
-      initSpark(s"${CONF_DIR}/${CONFIG_FILE}")
+      initSpark()
 
     val user = params.getOrElse("user", "-1").toInt
     val movie = params.getOrElse("movie", "-1").toInt
@@ -160,7 +160,7 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
   get("/raw/see/:user/:movie") {
 
     if(collabModel == null)
-      initSpark(s"${CONF_DIR}/${CONFIG_FILE}")
+      initSpark()
 
     val user = params.getOrElse("user", "-1").toInt
     val movie = params.getOrElse("movie", "-1").toInt
@@ -173,7 +173,7 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
   get("/see/:user/:movie/:rate") {
 
     if(collabModel == null)
-      initSpark(s"${CONF_DIR}/${CONFIG_FILE}")
+      initSpark()
 
     val user = params.getOrElse("user", "-1").toInt
     val movie = params.getOrElse("movie", "-1").toInt
@@ -192,7 +192,7 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
   get("/raw/see/:user/:movie/:rate") {
 
     if(collabModel == null)
-      initSpark(s"${CONF_DIR}/${CONFIG_FILE}")
+      initSpark()
 
     val user = params.getOrElse("user", "-1").toInt
     val movie = params.getOrElse("movie", "-1").toInt

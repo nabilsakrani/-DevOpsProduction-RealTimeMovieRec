@@ -11,7 +11,7 @@ class TestController extends ScalatraServlet with FlashMapSupport with ScalateSu
 
   def initController() = {
     controller = new Controller
-    controller.initSpark(s"${CONF_DIR}/${CONFIG_FILE}")
+    controller.initSpark()
   }
 
 
