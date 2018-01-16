@@ -14,7 +14,8 @@ import scala.xml.Node
 
 class Controller extends ScalatraServlet with FlashMapSupport with ScalateSupport{
 
-  var CONF_DIR = scala.util.Properties.envOrElse("DEVOPS_CONF_DIR", "conf")
+  //var CONF_DIR = scala.util.Properties.envOrElse("DEVOPS_CONF_DIR", "conf")
+  var CONF_DIR = "conf"
   var CONFIG_FILE = "RealTimeML.conf"
 
   private def displayPage(title:String, content:Seq[Node]) =
@@ -38,12 +39,14 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
 
   def initSpark(confFile : String) : Unit = {
 
-    val cf = new File(confFile)
+//    val cf = new File(confFile)
+//
+//    if(!cf.exists())
+//      throw new IllegalArgumentException("The Configuration File doesn't exists!!")
+//
+//    val config = ConfigFactory.parseFile(cf)
 
-    if(!cf.exists())
-      throw new IllegalArgumentException("The Configuration File doesn't exists!!")
-
-    val config = ConfigFactory.parseFile(cf)
+    val config = ConfigFactory.load()
 
     logger.info("------> Retrieve Conf variables <------")
     MODEL_ARCHIVE_PATH = config.getString("rtml.model.archive_path")

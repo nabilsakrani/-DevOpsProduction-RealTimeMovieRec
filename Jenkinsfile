@@ -30,6 +30,7 @@ pipeline {
         sh 'sudo cp target/*/*.war /opt/deploy/realTimeMovieRec/'
         sh 'sudo cp target/*/*.jar /opt/deploy/realTimeMovieRec/'
         sh 'sudo cp conf/* /opt/deploy/realTimeMovieRec/'
+        sh 'sudo cp target/*/*.jar /opt/staging/IntegrationStagingProject/lib'
       }
     }
   }
