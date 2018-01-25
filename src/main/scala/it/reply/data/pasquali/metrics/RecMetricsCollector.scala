@@ -1,6 +1,7 @@
 package it.reply.data.pasquali.metrics
 
 import it.reply.data.pasquali.metrics.model.{CounterMetric, Metric, TimerMetric}
+import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
 
@@ -8,6 +9,8 @@ object RecMetricsCollector {
 
   val metrics : mutable.HashMap[String, Metric] =
     mutable.HashMap[String, Metric]()
+
+  val logger = LoggerFactory.getLogger(getClass)
 
   def addMetric(label : String, metric: Metric) = {
     metrics.put(label, metric)
@@ -30,19 +33,43 @@ object RecMetricsCollector {
   }
 
   def set(label : String, value : Double) = {
-    metrics(label)._value = value
+
+    try{
+      metrics(label)._value = value
+    }catch{
+      case _ : Exception=> logger.warn(s"Unable to find label $label")
+    }
+
   }
 
   def startTimer(label : String) = {
-    metrics(label).asInstanceOf[TimerMetric].startTimer()
+
+    try{
+      metrics(label).asInstanceOf[TimerMetric].startTimer()
+    }catch{
+      case _ : Exception => logger.warn(s"Unable to find label $label")
+    }
+
   }
 
   def stopTimer(label : String) = {
-    metrics(label).asInstanceOf[TimerMetric].stopTimer()
+
+    try{
+      metrics(label).asInstanceOf[TimerMetric].stopTimer()
+    }catch{
+      case _ : Exception => logger.warn(s"Unable to find label $label")
+    }
+
   }
 
   def inc(label : String) = {
-    metrics(label).asInstanceOf[CounterMetric].inc()
+
+    try{
+      metrics(label).asInstanceOf[CounterMetric].inc()
+    }catch{
+      case _ : Exception => logger.warn(s"Unable to find label $label")
+    }
+
   }
 
 }
