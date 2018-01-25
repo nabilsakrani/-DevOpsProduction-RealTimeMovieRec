@@ -36,10 +36,19 @@ libraryDependencies ++= Seq(
   //"org.scalaj"              % "scalaj-http_2.11"              % "2.3.0"
 )
 
+
+libraryDependencies ++= Seq(
+
+  "io.prometheus" % "simpleclient" % "0.1.0",
+  "io.prometheus" % "simpleclient_common" % "0.1.0",
+  "io.prometheus" % "simpleclient_hotspot" % "0.1.0",
+  "io.prometheus" % "simpleclient_pushgateway" % "0.1.0",
+)
+
 enablePlugins(JettyPlugin)
 //enablePlugins(SbtTwirl)
 
-//containerPort in Jetty := 10000
+//containerPort in Jetty := 100000
 
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard

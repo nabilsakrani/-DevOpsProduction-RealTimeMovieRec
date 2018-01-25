@@ -5,7 +5,7 @@ import org.scalatra.scalate.ScalateSupport
 
 class TestController extends ScalatraServlet with FlashMapSupport with ScalateSupport {
 
-  var CONF_DIR = scala.util.Properties.envOrElse("DEVOPS_CONF_DIR", "conf")
+  var CONF_DIR = "conf"
   var CONFIG_FILE = "RealTimeML_staging.conf"
   var controller : Controller = null
 

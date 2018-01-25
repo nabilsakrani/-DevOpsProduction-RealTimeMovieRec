@@ -9,7 +9,7 @@ import scala.util.Properties
 
 class CotrollerSpec extends ScalatraFlatSpec with BeforeAndAfterAll {
 
-  var CONF_DIR = Properties.envOrElse("DEVOPS_CONF_DIR", "conf")
+  var CONF_DIR = "conf"
   var CONF_FILE = s"$CONF_DIR/RealTimeML_staging.conf"
 
   var config : Config = null
