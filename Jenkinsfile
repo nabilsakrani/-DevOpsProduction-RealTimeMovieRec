@@ -29,7 +29,7 @@ pipeline {
         archiveArtifacts 'target/scala-*/*.jar'
       }
     }
-    stage('Deploy') {
+    stage('Deploy Staging') {
       steps {
         sh 'sudo cp -Rf src/main/webapp /opt/deploy/realtime_ml/'
         sh 'sudo cp target/*/*.jar /opt/deploy/realtime_ml/'
