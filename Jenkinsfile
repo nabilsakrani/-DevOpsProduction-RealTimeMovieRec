@@ -31,7 +31,7 @@ pipeline {
     }
     stage('Deploy') {
       steps {
-        sh 'sudo cp src/main/webapp /opt/deploy/realtime_ml/'
+        sh 'sudo cp -Rf src/main/webapp /opt/deploy/realtime_ml/'
         sh 'sudo cp target/*/*.jar /opt/deploy/realtime_ml/'
         sh 'sudo cp conf/* /opt/deploy/realtime_ml/'
         sh 'sudo cp target/*/*.jar /opt/staging/IntegrationStagingProject/lib'
