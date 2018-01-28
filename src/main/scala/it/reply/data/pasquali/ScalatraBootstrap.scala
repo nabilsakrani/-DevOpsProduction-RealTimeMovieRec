@@ -1,7 +1,7 @@
+package it.reply.data.pasquali
+
 import javax.servlet.ServletContext
 
-import com.typesafe.config.ConfigFactory
-import it.reply.data.pasquali.controller.Controller
 import org.scalatra.LifeCycle
 
 class ScalatraBootstrap extends LifeCycle{

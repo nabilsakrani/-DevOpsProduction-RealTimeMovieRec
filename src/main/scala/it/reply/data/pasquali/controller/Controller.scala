@@ -1,212 +1,215 @@
 package it.reply.data.pasquali.controller
 
-import java.io.File
-
-import com.typesafe.config.ConfigFactory
-import it.reply.data.pasquali.engine.MovieRecommenderEngine
-import it.reply.data.pasquali.view.Template
+import it.reply.data.pasquali.engine.{AnsibleConnector, ClouderaConnector}
+import it.reply.data.pasquali.metrics.RecMetricsCollector
+import it.reply.data.pasquali.metrics.model.Metric
 import org.scalatra.scalate.ScalateSupport
 import org.scalatra.{FlashMapSupport, ScalatraServlet}
-import org.slf4j.LoggerFactory
-import org.zeroturnaround.zip.ZipUtil
 
-import scala.xml.Node
 
 class Controller extends ScalatraServlet with FlashMapSupport with ScalateSupport{
 
-  //var CONF_DIR = scala.util.Properties.envOrElse("DEVOPS_CONF_DIR", "conf")
-  var CONF_DIR = "conf"
-  var CONFIG_FILE = "application.conf"
+  var cloudera : ClouderaConnector = null
+  var ansible : AnsibleConnector = null
 
-  private def displayPage(title:String, content:Seq[Node]) =
-    Template.page(title, content, url(_))
-
-  var collabModel : MovieRecommenderEngine = null
-
-  var MODEL_ARCHIVE_PATH : String = ""
-  var MODEL_PATH : String = ""
-  var MODEL_NAME : String = ""
-  var SPARK_APPNAME : String = ""
-  var SPARK_MASTER : String = ""
-
-  var movieIDs : Array[Int] = Array()
-  var userIDs : Array[Int] = Array()
-
-  var userNodes : Array[Node] = Array()
-  var movieNodes : Array[Node] = Array()
-
-  val logger = LoggerFactory.getLogger(getClass)
-
-  def initSpark() : Unit = {
-
-//    val cf = new File(confFile)
-//
-//    if(!cf.exists())
-//      throw new IllegalArgumentException("The Configuration File doesn't exists!!")
-//
-//    val config = ConfigFactory.parseFile(cf)
-
-    val config = ConfigFactory.load()
-
-    logger.info("------> Retrieve Conf variables <------")
-    MODEL_ARCHIVE_PATH = config.getString("rtml.model.archive_path")
-    MODEL_PATH = config.getString("rtml.model.path")
-    MODEL_NAME = config.getString("rtml.model.name")
-    SPARK_APPNAME = config.getString("rtml.spark.app_name")
-    SPARK_MASTER = config.getString("rtml.spark.master")
-
-    if(!new File(MODEL_ARCHIVE_PATH).exists())
-      throw new IllegalArgumentException("The Zipped model doesn't exists")
-
-    logger.info("------> Initialize Spark")
-
-    collabModel = MovieRecommenderEngine()
-      .init(SPARK_APPNAME, SPARK_MASTER)
-
-
-    logger.info("------> ENV")
-    logger.info("------>")
-    logger.info(s"------> MODEL_ZIP_PATH = ${MODEL_ARCHIVE_PATH}")
-    logger.info(s"------> MODEL_PATH = ${MODEL_PATH}")
-    logger.info(s"------> MODEL_NAME = ${MODEL_NAME}")
-    logger.info(s"------> SPARK_APP_NAME = ${SPARK_APPNAME}")
-    logger.info(s"------> SPARK_MASTER = ${SPARK_MASTER}")
-
-
-    logger.info("------> Spark Initialized")
-    logger.info("------> Unzip ML Model")
-    logger.info(s"------> FULL_MODEL_PATH = ${MODEL_PATH}${MODEL_NAME}")
-
-    ZipUtil.unpack(new File(MODEL_ARCHIVE_PATH), new File(s"${MODEL_PATH}${MODEL_NAME}"))
-
-    logger.info("------> Load ML Model")
-
-    collabModel.loadCollaborativeModel(s"${MODEL_PATH}${MODEL_NAME}")
-
-    logger.info("------> Populate Movies and Users Lists")
-
-    userIDs = collabModel.model.userFeatures.sortByKey().collect().map(row => row._1)
-    movieIDs = collabModel.model.productFeatures.sortByKey().collect().map(row => row._1)
-
-//    userIDs.foreach(println)
-//    movieIDs.foreach(println)
-
-    userNodes = userIDs.map(id => <li>{id}</li>)
-    movieNodes = movieIDs.map(id => <li>{id}</li>)
-
-    logger.info("------> IS ONLINE")
+  def initConnectors() : Unit = {
+    cloudera = ClouderaConnector("cloudera-vm", "7051")
+    ansible = AnsibleConnector(
+      "/opt/DevOpsProduction-Orchestrator/ansible/s",
+      "/home/xxpasquxx/.ssh/ansible_rsa_key",
+      "xxpasquxx"
+    )
   }
 
   get("/") {
+    if(cloudera == null)
+      initConnectors()
+    "This webapp only collect and provides metrics for DevOps echosystem\n"+
+    "The collection process is periodically run in order to provide fresh values\n\n"+
+    "Use /metrics to get actual metrics\n"+
+    "Use /metrics/fresh to get refreshed metrics"
+  }
 
-    if(collabModel == null)
-    {
-      initSpark()
+  // *********************** MACHINE STATUS *******************
+
+  get("/isonline") {
+    "/isonline/big-brother\n" +
+      "/isonline/cloudera-vm\n" +
+      "/isonline/devops-worker"
+  }
+
+  get("/isonline/:machine") {
+    val vm = params.getOrElse("machine", "0.0.0.0")
+    s"$vm is online? ${if(collectMachineStatus(vm)) "yes" else "no"}"
+  }
+
+  // *********************** DATABASE STATE *******************
+
+  get("/count/hive/:database/:table") {
+
+    /*
+    Numero movies hive
+    Numero links hive
+    Numero tags hive
+    Numero ratings hive
+    Numero gtags hive
+     */
+
+    val db = params.getOrElse("database", "default")
+    val table = params.getOrElse("table", "test")
+    val count = collectCountsHive(db, table)
+
+    s"Found $count elements in $db.$table"
+  }
+
+  get("/count/kudu/:database/:table") {
+
+    /*
+    Numero movies kudu
+    Numero tags kudu
+    Numero ratings kudu
+    Numero gtags kudu
+     */
+
+    val db = params.getOrElse("database", "default")
+    val table = params.getOrElse("table", "test")
+    val count = collectCountsKudu(db, table)
+
+    s"Found $count elements in $db.$table"
+  }
+
+
+  // *********************** SERVICE STATUS ********************
+
+  get("/service/status") {
+    var body = "/service/status/cloudera-vm/cloudera-scm-server\n"
+    body += "/service/status/cloudera-vm/cloudera-scm-agents\n"
+    body += "\n"
+    body += "/service/status/big-brother/jenkins\n"
+    body += "/service/status/big-brother/prometheus\n"
+    body += "/service/status/big-brother/node_exporter\n"
+    body += "/service/status/big-brother/grafana-server\n"
+    body += "/service/status/big-brother/pushgateway\n"
+    body += "\n"
+    body += "/service/status/devops-worker/node_exporter\n"
+    body += "/service/status/devops-worker/devops-kafka-jdbc-connector\n"
+    body += "/service/status/devops-worker/devops-rtetl-ratings\n"
+    body += "/service/status/devops-worker/devops-rtetl-tags\n"
+    body += "/service/status/devops-worker/devops-bml\n"
+    body
+  }
+
+  get("/service/status/:machine/:service") {
+    val vm = params.getOrElse("machine", "0.0.0.0")
+    val service = params.getOrElse("service", "")
+    val running = collectServiceStatus(vm, service)
+
+    s"$service on $vm state : ${if(running) "running" else "stop :("}"
+  }
+
+  // ********************** EXPOSE METRICS *************************
+
+  get("/metrics/fresh") {
+    if(cloudera == null)
+      initConnectors()
+
+    // MACHINE STATUS
+    val cvm = collectMachineStatus("cloudera-vm")
+    val dw = collectMachineStatus("devops-worker")
+
+    // CLOUDERA WM
+    if(cvm){
+
+      // DB CONTENT
+      collectCountsHive("datalake", "movies")
+      collectCountsHive("datalake", "links")
+      collectCountsHive("datalake", "ratings")
+      collectCountsHive("datalake", "tags")
+
+      collectCountsKudu("datamart", "movies")
+      collectCountsKudu("datamart", "ratings")
+      collectCountsKudu("datamart", "tags")
+
+      // SERVICES
+      collectServiceStatus("cloudera-vm", "cloudera-scm-server")
+      collectServiceStatus("cloudera-vm", "cloudera-scm-agents")
     }
+    else println("[ ERROR ] Cloudera VM is offline!!")
 
-    val users = ""
-    val movies = ""
+    // DEVOPS WORKER
+    if(dw){
+      collectServiceStatus("devops-worker", "node_exporter")
+      collectServiceStatus("devops-worker", "devops-kafka-jdbc-connector")
+      collectServiceStatus("devops-worker", "devops-rtetl-ratings")
+      collectServiceStatus("devops-worker", "devops-rtetl-tags")
+      collectServiceStatus("devops-worker", "devops-bml")
+    }
+    else println("[ ERROR ] DevOps worker is offline!!")
 
+    // BIG-BROTHER
+    //This will run on it, i'll assume is online
+    collectServiceStatus("big-brother", "node_exporter")
+    collectServiceStatus("big-brother", "prometheus")
+    collectServiceStatus("big-brother", "pushgateway")
+    collectServiceStatus("big-brother", "grafana-server")
+    collectServiceStatus("big-brother", "jenkins")
 
-    displayPage("Movielens Recommender Instructions",
-
-      <span>
-        For now there isn't any form to insert the move you want to see.<br/>
-        But you can use a very confrotable search in the address bar :D.<br/>
-        <br/>
-
-        Actually the movie recommender works fine with movie already seen by someone,
-        obviously you can see a movie that noboy alreasy seen, but don't expect to get a significant advice.
-        <br/><br/>
-
-        So, choose a User and see a movie as him: <br/>
-        <code>/see/userID/movieID</code><br/>
-
-        or insert a new User id and start rate movies:<br/>
-        <code>/see/newUserID/newMovieID/rate</code>
-        <br/>
-        <b>rate is a decimal value from 0.0 to 5.0</b>
-
-      </span>
-
-      <h4>Users</h4>
-      <ul>
-        { userNodes }
-      </ul>
-
-      <h4>Movies</h4>
-      <ul>
-        { movieNodes }
-      </ul>
-    )
+    RecMetricsCollector.getPrometheusMetrics()
   }
 
-  get("/see/:user/:movie") {
+  get("/metrics") {
+    if(cloudera == null)
+      initConnectors()
 
-    if(collabModel == null)
-      initSpark()
-
-    val user = params.getOrElse("user", "-1").toInt
-    val movie = params.getOrElse("movie", "-1").toInt
-
-    val rate = collabModel.predictRating(user, movie)
-
-    displayPage("See a Movie",
-      <span>
-        User { user } see movie { movie }...<br/>
-          ...and I suppose he rate it { rate }/5.0
-      </span>
-    )
+    RecMetricsCollector.getPrometheusMetrics()
   }
 
-  get("/raw/see/:user/:movie") {
+  // ********************** COLLECTORS *****************************
 
-    if(collabModel == null)
-      initSpark()
+  def collectMachineStatus(vm : String) : Boolean = {
+    val online = ansible.pingMachine(vm)
 
-    val user = params.getOrElse("user", "-1").toInt
-    val movie = params.getOrElse("movie", "-1").toInt
+    RecMetricsCollector.addMetric(
+      s"is_online_${vm}",
+      new Metric(s"is_online_${vm}", s"1 if $vm is online, 0 otherwise",
+        if(online) 1 else 0, "devops_exporter", ""))
 
-    val rate = collabModel.predictRating(user, movie)
-
-    rate
+    online
   }
 
-  get("/see/:user/:movie/:rate") {
+  def collectCountsHive(db : String, table : String) : Long = {
 
-    if(collabModel == null)
-      initSpark()
+    val count = cloudera.countHive(db, table)
 
-    val user = params.getOrElse("user", "-1").toInt
-    val movie = params.getOrElse("movie", "-1").toInt
-    val rate = params.getOrElse("rate", "0.0")
+    RecMetricsCollector.addMetric(
+      s"hive_${table}_number",
+      new Metric(s"hive_${table}_number", s"number of ${table} in the ${db}",
+        count, "devops_exporter", ""))
 
-    val predict = collabModel.predictRating(user, movie)
-
-    displayPage("See a Movie",
-      <span>
-        User { user } see movie { movie } and rate it { rate }.
-        The recommender supposed a rate of { predict }
-      </span>
-    )
+    count
   }
 
-  get("/raw/see/:user/:movie/:rate") {
+  def collectCountsKudu(db : String, table : String) : Long = {
 
-    if(collabModel == null)
-      initSpark()
+    val count = cloudera.countKudu(db, table)
 
-    val user = params.getOrElse("user", "-1").toInt
-    val movie = params.getOrElse("movie", "-1").toInt
-    val rate = params.getOrElse("rate", "0.0")
+    RecMetricsCollector.addMetric(
+      s"hive_${table}_number",
+      new Metric(s"kudu_${table}_number", s"number of ${table} in the ${db}",
+        count, "devops_exporter", ""))
 
-    val predict = collabModel.predictRating(user, movie)
-
-    s"$predict - $rate"
+    count
   }
 
+  def collectServiceStatus(vm: String, service: String) : Boolean = {
+    val running = ansible.checkServiceRunning(vm, service)
 
-  get("/isOnline") {
-    "is Online"
+    RecMetricsCollector.addMetric(
+      s"service_status_$service",
+      new Metric(s"is_online_${vm}", s"1 if $vm is online, 0 otherwise",
+        if(running) 1 else 0, "devops_exporter", vm))
+
+    running
   }
 }
+
