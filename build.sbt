@@ -33,7 +33,7 @@ libraryDependencies ++= Seq(
   "org.apache.kudu"         %  "kudu-spark2_2.11"             % "1.5.0",
   "org.apache.spark"        %  "spark-mllib_2.11"             % "2.2.0",
   "com.typesafe"            %  "config"                       % "1.3.2",
-  //"org.scalaj"              % "scalaj-http_2.11"              % "2.3.0"
+  "javax.servlet"           %  "javax.servlet-api"            % "3.1.0"
 )
 
 

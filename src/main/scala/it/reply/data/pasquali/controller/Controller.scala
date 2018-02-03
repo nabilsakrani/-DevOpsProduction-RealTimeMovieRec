@@ -14,7 +14,7 @@ import org.scalatra.{FlashMapSupport, ScalatraServlet}
 import org.slf4j.LoggerFactory
 import org.zeroturnaround.zip.ZipUtil
 
-import scala.xml.Node
+import scala.xml.{Elem, Node}
 
 class Controller extends ScalatraServlet with FlashMapSupport with ScalateSupport{
 
@@ -32,6 +32,7 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
   var MODEL_NAME : String = ""
   var SPARK_APPNAME : String = ""
   var SPARK_MASTER : String = ""
+  var TOGGLE_NEW_GUI : Boolean = false
 
   var movieIDs : Array[Int] = Array()
   var userIDs : Array[Int] = Array()
@@ -103,9 +104,6 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
 //    userIDs.foreach(println)
 //    movieIDs.foreach(println)
 
-    userNodes = userIDs.map(id => <li>{id}</li>)
-    movieNodes = movieIDs.map(id => <li>{id}</li>)
-
     //****************************************************************************
 
     ENV = config.getString("rtml.metrics.environment")
@@ -144,17 +142,55 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
     logger.info("------> IS ONLINE")
   }
 
-  get("/") {
+  def showNewGUI() : Elem = {
+    userNodes = userIDs.map(id => <option>{id}</option>)
+    movieNodes = movieIDs.map(id => <option>{id}</option>)
 
-    if(collabModel == null)
-    {
-      initSpark()
-    }
+    val ratingsNodes = Array("Just See", 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0)
+      .map(el => el.toString)
+      .map(el => <option>{el}</option>)
 
-    val users = ""
-    val movies = ""
+    displayPage("Movielens Recommender Instructions",
 
-    RecMetricsCollector.inc(LABEL_REQUESTS_NUMBER)
+      <span>
+        Look how amazing is this new GUI, it has a beautiful form to select your ID and which movie<br/>
+        you want to see. Say goodby yo the very confortamble search in the address bar.<br/>
+        <br/>
+        <br/>
+
+        So, choose a User and see a movie as him: <br/>
+        <code>/see/userID/movieID</code><br/>
+
+        or insert a new User id and start rate movies:<br/>
+        <code>/see/newUserID/newMovieID/rate</code>
+        <br/>
+        <b>rate is a decimal value from 0.0 to 5.0</b>
+
+      </span>
+
+      <form action="/see" method="get">
+        <label for="inputUser">User:</label>
+        <select class="form-control" id="inputUser" name="inputUser">
+          { userNodes }
+        </select>
+        <label for="inputMovie">Movie:</label>
+        <select class="form-control" id="inputMovie" name="inputMovie">
+          { movieNodes }
+        </select>
+        <label for="inputRating">Rating:</label>
+        <select class="form-control" id="inputRating" name="inputRating">
+          { ratingsNodes }
+        </select>
+        <p><br/></p>
+        <button type="submit" class="btn btn-primary">See it !</button>
+      </form>
+
+    )
+  }
+
+  def showOldGUI() : Elem = {
+    userNodes = userIDs.map(id => <li>{id}</li>)
+    movieNodes = movieIDs.map(id => <li>{id}</li>)
 
     displayPage("Movielens Recommender Instructions",
 
@@ -177,18 +213,72 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
 
       </span>
 
-      <h4>Users</h4>
-      <ul>
-        { userNodes }
-      </ul>
+        <h4>Users</h4>
+        <ul>
+          { userNodes }
+        </ul>
 
-      <h4>Movies</h4>
-      <ul>
-        { movieNodes }
-      </ul>
+        <h4>Movies</h4>
+        <ul>
+          { movieNodes }
+        </ul>
     )
+  }
+
+  get("/") {
+
+    if(collabModel == null)
+    {
+      initSpark()
+    }
+
+    val toggles = ConfigFactory.parseFile(new File("conf/Toggle.conf"))
+    TOGGLE_NEW_GUI = toggles.getBoolean("toggle.new_gui")
+
+    logger.info(s"ENABLE NEW GUI ? ${TOGGLE_NEW_GUI}")
+
+    val users = ""
+    val movies = ""
+
+    RecMetricsCollector.inc(LABEL_REQUESTS_NUMBER)
+
+    if(TOGGLE_NEW_GUI)
+      showNewGUI()
+    else
+      showOldGUI()
+
+
 
   }
+
+  get("/see") {
+    if(collabModel == null)
+      initSpark()
+
+    RecMetricsCollector.startTimer(LABEL_PROCESS_DURATION)
+
+    val user = params("inputUser").toInt
+    val movie = params("inputMovie").toInt
+
+    val rating = params("inputRating")
+    if(rating.contains("Just See"))
+      redirect(url(s"/see/$user/$movie"))
+    else
+      redirect(url(s"/see/$user/$movie/${rating}"))
+
+//    val rate = collabModel.predictRating(user, movie)
+//
+//    RecMetricsCollector.stopTimer(LABEL_PROCESS_DURATION)
+//    RecMetricsCollector.inc(LABEL_REQUESTS_NUMBER)
+//
+//    displayPage("See a Movie",
+//      <span>
+//        User { user } see movie { movie }...<br/>
+//        ...and I suppose he rate it { rate }/5.0
+//      </span>
+//    )
+  }
+
 
   get("/see/:user/:movie") {
 

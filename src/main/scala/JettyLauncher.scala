@@ -14,10 +14,13 @@ object JettyLauncher { // this is my entry object as specified in sbt project de
   def main(args: Array[String]) {
     val port = if(System.getenv("PORT") != null) System.getenv("PORT").toInt else 10000
 
+    val resBase = "src/main/webapp"
+    //val resBase = "/opt/devops/realtime_ml/webapp"
+
     val server = new Server(port)
     val context = new WebAppContext()
     context.setContextPath("/")
-    context.setResourceBase("/opt/devops/realtime_ml/webapp")
+    context.setResourceBase(resBase)
     context.addEventListener(new ScalatraListener)
     context.addServlet(classOf[Controller], "/")
 

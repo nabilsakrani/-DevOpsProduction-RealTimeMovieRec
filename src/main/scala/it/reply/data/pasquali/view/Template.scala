@@ -19,9 +19,19 @@ object Template {
         <meta name="description" content="Real Time Movielens Recommender" />
         <meta name="author" content="Dario Pasquali" />
 
+        <!---->
         <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" />
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
         <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+        <!---->
+
+        <!--
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"/>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        -->
+
         <link rel="stylesheet" type="text/css" href="/assets/css/main.css" />
 
         <!-- Le styles
@@ -55,6 +65,9 @@ object Template {
             </div>
           </div>
         </div>-->
+
+
+
 
         <nav class="navbar navbar-default navbar-static-top navbar-inverse">
           <div class="container">
@@ -92,6 +105,8 @@ object Template {
           </div>
         </nav>
 
+
+
         <div class="jumbotron text-center">
           <div class="container">
             <a href="/">
@@ -112,7 +127,7 @@ object Template {
             New features will be implemented day by day, so Stay Tuned!!
           </div>
 
-          <div class="col-md-8">
+          <div class="col-md-8 container">
             <h3><span class="glyphicon glyphicon-film"></span> What is the next movie??</h3>
 
             { content }
@@ -122,30 +137,6 @@ object Template {
 
 
         </div>
-
-
-
-
-        <!--<div class="container">
-          <div class="content">
-            <div class="page-header">
-              <h1>{ title }</h1>
-            </div>
-            <div class="row">
-              <div class="span3">
-                <ul class="nav nav-list">-->
-                  <!--<li><a href={url("/cookies-example")}>Cookies example</a></li>-->
-<!--                  <li><a href="/">Hello world</a></li>
-                </ul>
-              </div>
-              <div class="span9">
-                {content}
-              </div>
-              <hr/>
-            </div>
-          </div>
-        </div>
--->
         <footer class="vcard" role="contentinfo">
 
         </footer>
