@@ -152,22 +152,6 @@ class Controller extends ScalatraServlet with FlashMapSupport with ScalateSuppor
 
     displayPage("Movielens Recommender Instructions",
 
-      <span>
-        Look how amazing is this new GUI, it has a beautiful form to select your ID and which movie<br/>
-        you want to see. Say goodby yo the very confortamble search in the address bar.<br/>
-        <br/>
-        <br/>
-
-        So, choose a User and see a movie as him: <br/>
-        <code>/see/userID/movieID</code><br/>
-
-        or insert a new User id and start rate movies:<br/>
-        <code>/see/newUserID/newMovieID/rate</code>
-        <br/>
-        <b>rate is a decimal value from 0.0 to 5.0</b>
-
-      </span>
-
       <form action="/see" method="get">
         <label for="inputUser">User:</label>
         <select class="form-control" id="inputUser" name="inputUser">

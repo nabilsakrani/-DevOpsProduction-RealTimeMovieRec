@@ -2,7 +2,7 @@ failMessage = ""
 pipeline {
   agent any
   environment {
-    DEPLOY_TARGET = 'worker-test'
+    DEPLOY_TARGET = 'devops-worker'
   }
   stages {
     stage('Config System') {
@@ -21,6 +21,7 @@ pipeline {
       steps {
         sh 'sbt clean test'
         archiveArtifacts 'target/test-reports/*.xml'
+        junit(testResults: 'target/test-reports/ControllerSpec.xml', allowEmptyResults: true)
       }
     }
     stage('Build') {

@@ -128,7 +128,7 @@ object Template {
           </div>
 
           <div class="col-md-8 container">
-            <h3><span class="glyphicon glyphicon-film"></span> What is the next movie??</h3>
+            <h3><span class="glyphicon glyphicon-film"></span> Which is the next movie??</h3>
 
             { content }
 
